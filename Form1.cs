@@ -32,6 +32,7 @@ namespace ReportDDC
         string token_dev;
         string token_ddc;
         string load = null;
+        string load2 = null;
         string find_guid;
         int ind1;
         int ind2;
@@ -40,6 +41,9 @@ namespace ReportDDC
         string st;
         string user_st;
         string user_st1;
+        int j = 0;
+        int result = 100;
+        int str = 1;
 
         public Form1()
         {
@@ -48,7 +52,7 @@ namespace ReportDDC
         }
 
         private void button1_Click(object sender, EventArgs e)
-        {
+        {            
             var client = new RestClient("https://diadoc-api.kontur.ru/GetOrganization?inn=" + var_inn + "&kpp=" + var_kpp );
             client.Timeout = -1;
             var request = new RestRequest(Method.GET);
@@ -68,8 +72,7 @@ namespace ReportDDC
             st = re.Replace(st, "");
 
             textBox8.Text = st;
-            st = null;
-            user_st = null;
+            st = null;            
             user_st1 = null;
         }
 
@@ -170,21 +173,21 @@ namespace ReportDDC
 
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
         {
-            load = "word";
+            load = "word";            
         }
 
         private void radioButton2_CheckedChanged(object sender, EventArgs e)
         {
-            load = "excel";
+            load = "excel";            
         }
 
         private void radioButton3_CheckedChanged(object sender, EventArgs e)
         {
-            load = "txt";
+            load = "txt";            
         }
 
         private void button2_Click_1(object sender, EventArgs e)
-        {
+        {            
             var client = new RestClient("https://diadoc-api.kontur.ru/GetBox?boxId="+boxid);
             client.Timeout = -1;
             var request = new RestRequest(Method.GET);
@@ -200,7 +203,7 @@ namespace ReportDDC
                 ind1 = (find_guid.IndexOf("OrgId")) + 12;
                 ind2 = (find_guid.LastIndexOf("OrgId")) - 3;
                 guid = find_guid.Substring(ind1, (ind2 - ind1));
-                MessageBox.Show("Выполнен импорт BoxId, OrgId:" + guid, "Сообщение", MessageBoxButtons.YesNo, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                MessageBox.Show("Выполнен импорт BoxId, OrgId:" + guid, "Сообщение", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
 
                 var client1 = new RestClient("https://diadoc-api.kontur.ru//V2/GetCounteragents?myOrgId=" + guid);
                 client1.Timeout = -1;
@@ -222,8 +225,7 @@ namespace ReportDDC
                 st = re.Replace(st, "");
 
                 textBox10.Text = st;
-                st = null;
-                user_st = null;
+                st = null;                
                 user_st1 = null;
             }
 
@@ -237,8 +239,9 @@ namespace ReportDDC
         }
 
         private void button4_Click(object sender, EventArgs e)
-        {
-            if (load == "word")
+        {            
+
+            if (load2 == "word")
             {
                 Word.Application wordapp = new Word.Application();
                 wordapp.Visible = true;
@@ -248,7 +251,7 @@ namespace ReportDDC
                 wordapp.Selection.TypeText(textBox10.Text);
                 wordapp = null;
             }
-            else if (load == "excel")
+            else if (load2 == "excel")
             {
                 // Создаём экземпляр нашего приложения
                 Excel.Application excelApp = new Excel.Application();
@@ -259,13 +262,48 @@ namespace ReportDDC
 
                 workBook = excelApp.Workbooks.Add();
                 workSheet = (Excel.Worksheet)workBook.Worksheets.get_Item(1);
-                workSheet.Cells[1, 1] = textBox10.Text;
+                                
+                for (int i = 0; i < user_st.Length; i++)
+                {
+                    user_st1 = Convert.ToString(user_st[i]);
+                    int result = String.Compare(user_st1, Convert.ToString(user_st[(user_st.Length)-1]));
+                    str = str + 1;
+                    if ((user_st1.Contains(",")) & (i == 0))
+                    {
 
+                    }
+                    else if (user_st1.Contains(","))
+                    {
+                        j = j + 1;
+                        workSheet.Cells[j, 1] = st;
+                        st = null;
+                    }
+                    else if (result == 0 & str == (user_st.Length - 1))
+                    {
+                        j = j + 1;
+                        workSheet.Cells[j, 1] = st;
+                        str = 0;
+                    }
+                    
+                    else
+                    {
+                        st = st + user_st1;                        
+                    }
+                    
+                }
+                var re = new Regex(@",");
+                st = re.Replace(st, "");
+                
+                st = null;                
+                user_st1 = null;
+                j = 0;
+
+                
                 // Открываем созданный excel-файл
                 excelApp.Visible = true;
                 excelApp.UserControl = true;
             }
-            else if (load == "txt")
+            else if (load2 == "txt")
             {
                 StreamWriter wrtr = new StreamWriter(@"C:\Games\test_file.txt");
                 {
@@ -274,11 +312,15 @@ namespace ReportDDC
                 }                
                 Process.Start("notepad.exe", @"C:\Games\test_file.txt");
             }
-            MessageBox.Show("Выберите способ выгрузки", "Сообщение", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+            else if (load2 == null)
+            {
+                MessageBox.Show("Выберите способ выгрузки", "Сообщение", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+            }            
         }
 
         private void button5_Click(object sender, EventArgs e)
-        {
+        {            
+
             if (load == "word")
             {
                 Word.Application wordapp = new Word.Application();
@@ -300,8 +342,43 @@ namespace ReportDDC
 
                 workBook = excelApp.Workbooks.Add();
                 workSheet = (Excel.Worksheet)workBook.Worksheets.get_Item(1);
-                workSheet.Cells[1, 1] = textBox8.Text;
-                                                
+
+                for (int i = 0; i < user_st.Length; i++)
+                {
+                    user_st1 = Convert.ToString(user_st[i]);
+                    int result = String.Compare(user_st1, Convert.ToString(user_st[(user_st.Length) - 1]));
+                    str = str + 1;
+                    if ((user_st1.Contains(",")) & (i == 0))
+                    {
+
+                    }
+                    else if (user_st1.Contains(","))
+                    {
+                        j = j + 1;
+                        workSheet.Cells[j, 1] = st;
+                        st = null;
+                    }
+                    else if (result == 0 & str == (user_st.Length - 1))
+                    {
+                        j = j + 1;
+                        workSheet.Cells[j, 1] = st;
+                        str = 0;
+                    }
+
+                    else
+                    {
+                        st = st + user_st1;
+                    }
+
+                }
+                var re = new Regex(@",");
+                st = re.Replace(st, "");
+
+                st = null;                
+                user_st1 = null;
+                j = 0;
+
+
                 // Открываем созданный excel-файл
                 excelApp.Visible = true;
                 excelApp.UserControl = true;
@@ -314,24 +391,27 @@ namespace ReportDDC
                     wrtr.Close();
                 }
                 Process.Start("notepad.exe", @"C:\Games\test_file.txt");
-            }            
-            MessageBox.Show("Выберите способ выгрузки", "Сообщение", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
-
+            }
+            else if (load == null)
+            {
+                MessageBox.Show("Выберите способ выгрузки", "Сообщение", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+            }
+            
         }
 
         private void radioButton4_CheckedChanged(object sender, EventArgs e)
         {
-            load = "word";
+            load2 = "word";            
         }
 
         private void radioButton5_CheckedChanged(object sender, EventArgs e)
         {
-            load = "excel";
+            load2 = "excel";            
         }
 
         private void radioButton6_CheckedChanged(object sender, EventArgs e)
         {
-            load = "txt";
+            load2 = "txt";            
         }
         
     }

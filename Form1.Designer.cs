@@ -185,7 +185,7 @@
             this.groupBox1.Size = new System.Drawing.Size(486, 269);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Авторизация в Диадок/API";
+            this.groupBox1.Text = "АВТОРИЗАЦИЯ";
             // 
             // panel1
             // 
@@ -254,9 +254,9 @@
             this.label9.AutoSize = true;
             this.label9.Location = new System.Drawing.Point(6, 169);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(145, 16);
+            this.label9.Size = new System.Drawing.Size(139, 16);
             this.label9.TabIndex = 2;
-            this.label9.Text = "Токен разработчика";
+            this.label9.Text = "Ключ разработчика";
             // 
             // textBox5
             // 
